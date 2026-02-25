@@ -10,9 +10,11 @@ const AuthenticationLayout: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center overflow-hidden fixed inset-0 ">
-      <div className="relative w-full max-w-md ">
-        <Outlet />
+    <div className="fixed inset-0 overflow-y-auto">
+      <div className="flex min-h-full items-start justify-center px-4 py-6 sm:items-center">
+        <div className="relative w-full max-w-md">
+          <Outlet />
+        </div>
       </div>
     </div>
   );
