@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Bot, Sparkles } from "lucide-react";
 import { isTokenValid } from "@/lib/isTokenValid.ts";
 
 const ChatLayout: React.FC = () => {

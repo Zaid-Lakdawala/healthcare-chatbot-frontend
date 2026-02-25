@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import { UserProtectedRoute, AdminProtectedRoute } from "./guards";
 import AuthenticationLayout from "./layouts/AuthenticationLayout";
 import Login from "./pages/login";

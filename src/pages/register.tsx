@@ -25,7 +25,7 @@ import { useRegisterMutation } from "@/store/user/api";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const [registerMutation, { isLoading }] = useRegisterMutation();
+  const [registerMutation] = useRegisterMutation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -57,7 +57,7 @@ const Register: React.FC = () => {
         .matches(/[0-9]/, "Password must contain at least one number")
         .matches(
           /[!@#$%^&*(),.?":{}|<>]/,
-          "Password must contain at least one special character"
+          "Password must contain at least one special character",
         )
         .required("Password is required"),
       confirmPassword: Yup.string()
