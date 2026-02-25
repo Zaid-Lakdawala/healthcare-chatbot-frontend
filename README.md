@@ -1,4 +1,4 @@
-# healthcare-chatbot-frontend
+# Healthcare Chatbot Frontend
 
 Frontend application for the Healthcare Chatbot, built with React, TypeScript, Vite, Redux Toolkit, and Radix UI components.
 
