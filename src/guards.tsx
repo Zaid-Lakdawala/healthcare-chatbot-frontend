@@ -26,3 +26,18 @@ export const AdminProtectedRoute = () => {
 
   return <Outlet />;
 };
+
+export const DoctorProtectedRoute = () => {
+  const isValid = isTokenValid();
+  const user = getAuthUser();
+
+  if (!isValid || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role !== "doctor") {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
+};

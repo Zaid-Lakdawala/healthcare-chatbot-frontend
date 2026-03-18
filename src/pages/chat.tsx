@@ -5,6 +5,7 @@ import { Search, X, Menu, Bot, User, Send, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuestionnaireDialog } from "@/components/QuestionnaireDialog";
+import { ConversationSummaryDialog } from "@/components/ConversationSummaryDialog";
 import { useGetQuestionnaireStatusQuery } from "@/store/questionnaire/api";
 import {
   useStartConversationMutation,
@@ -13,6 +14,8 @@ import {
   useCheckActiveConversationQuery,
   useEndConversationMutation,
   useSendMessageMutation,
+  useLazyGetConversationSummaryQuery,
+  useGenerateConversationSummaryMutation,
 } from "@/store/chat/api";
 
 const Chat: React.FC = () => {
@@ -28,6 +31,12 @@ const Chat: React.FC = () => {
   const [hasSubmittedQuestionnaire, setHasSubmittedQuestionnaire] =
     useState(false);
   const [isEndingConversation, setIsEndingConversation] = useState(false);
+  const [summaryDialogOpen, setSummaryDialogOpen] = useState(false);
+  const [selectedSummaryChatTitle, setSelectedSummaryChatTitle] = useState("");
+  const [summaryText, setSummaryText] = useState("");
+  const [summaryCreatedAt, setSummaryCreatedAt] = useState<string | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
   const sidebarScrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -37,6 +46,9 @@ const Chat: React.FC = () => {
     useStartConversationMutation();
   const [sendMessage] = useSendMessageMutation();
   const [endConversation] = useEndConversationMutation();
+  const [fetchConversationSummary] = useLazyGetConversationSummaryQuery();
+  const [generateConversationSummary] =
+    useGenerateConversationSummaryMutation();
   const { data: conversationsList } = useGetConversationsQuery();
   const { data: currentConversation } = useGetConversationQuery(
     conversationId!,
@@ -109,6 +121,55 @@ const Chat: React.FC = () => {
 
   const handleConversationClick = (convId: string) => {
     navigate(`/chat/${convId}`);
+  };
+
+  const getApiErrorMessage = (error: any, fallbackMessage: string) => {
+    return (
+      error?.data?.message || error?.error || error?.message || fallbackMessage
+    );
+  };
+
+  const handleSummaryClick = async (convId: string, title: string) => {
+    setSelectedSummaryChatTitle(title);
+    setSummaryDialogOpen(true);
+    setSummaryLoading(true);
+    setSummaryError(null);
+    setSummaryText("");
+    setSummaryCreatedAt(null);
+
+    try {
+      const existingSummary = await fetchConversationSummary(
+        convId,
+        true,
+      ).unwrap();
+      setSummaryText(existingSummary.summary);
+      setSummaryCreatedAt(existingSummary.summary_created_at || null);
+    } catch (fetchError: any) {
+      if (fetchError?.status === 404) {
+        try {
+          const generatedSummary =
+            await generateConversationSummary(convId).unwrap();
+          setSummaryText(generatedSummary.summary);
+          setSummaryCreatedAt(generatedSummary.summary_created_at || null);
+        } catch (generateError: any) {
+          setSummaryError(
+            getApiErrorMessage(
+              generateError,
+              "Failed to generate summary. Please try again.",
+            ),
+          );
+        }
+      } else {
+        setSummaryError(
+          getApiErrorMessage(
+            fetchError,
+            "Failed to fetch summary. Please try again.",
+          ),
+        );
+      }
+    } finally {
+      setSummaryLoading(false);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -232,6 +293,14 @@ const Chat: React.FC = () => {
                   "New Consultation"
                 )}
               </Button>
+
+              <Button
+                variant="outline"
+                className="w-full mt-2"
+                onClick={() => navigate("/consultations")}
+              >
+                Doctor Consultation
+              </Button>
             </div>
 
             {/* Search */}
@@ -315,10 +384,18 @@ const Chat: React.FC = () => {
                             .includes(searchQuery.toLowerCase()),
                         )
                         .map((conv) => (
-                          <button
+                          <div
                             key={conv._id}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => handleConversationClick(conv._id)}
-                            className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                handleConversationClick(conv._id);
+                              }
+                            }}
+                            className={`w-full text-left p-3 rounded-lg transition-all duration-200 cursor-pointer ${
                               conversationId === conv._id
                                 ? "bg-primary/10 border border-primary/30"
                                 : "hover:bg-muted/50 border border-transparent"
@@ -330,9 +407,19 @@ const Chat: React.FC = () => {
                                 <p className="text-sm font-medium truncate opacity-75">
                                   {conv.title}
                                 </p>
+                                <button
+                                  type="button"
+                                  className="mt-1 text-xs text-primary/90 hover:text-primary underline underline-offset-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSummaryClick(conv._id, conv.title);
+                                  }}
+                                >
+                                  View summary
+                                </button>
                               </div>
                             </div>
-                          </button>
+                          </div>
                         ))}
                       {(!conversationsList ||
                         conversationsList
@@ -555,6 +642,16 @@ const Chat: React.FC = () => {
           </div>
         )}
       </div>
+
+      <ConversationSummaryDialog
+        open={summaryDialogOpen}
+        onOpenChange={setSummaryDialogOpen}
+        chatTitle={selectedSummaryChatTitle}
+        summary={summaryText}
+        summaryCreatedAt={summaryCreatedAt}
+        isLoading={summaryLoading}
+        error={summaryError}
+      />
     </div>
   );
 };

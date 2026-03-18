@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useLoginMutation } from "@/store/user/api.ts";
+import { getAuthUser } from "@/lib/isTokenValid";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -37,7 +38,14 @@ const Login: React.FC = () => {
       try {
         setSubmitting(true);
         await loginMutation(values).unwrap();
-        navigate("/", { replace: true });
+        const authUser = getAuthUser();
+        if (authUser?.role === "admin") {
+          navigate("/admin", { replace: true });
+        } else if (authUser?.role === "doctor") {
+          navigate("/doctor", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
         // navigation handled by auth effect when auth becomes truthy
       } finally {
         setSubmitting(false);

@@ -126,6 +126,7 @@ const UserList: React.FC = () => {
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="doctor">Doctor</SelectItem>
             <SelectItem value="user">User</SelectItem>
           </SelectContent>
         </Select>

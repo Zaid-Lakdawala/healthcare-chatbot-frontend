@@ -14,14 +14,22 @@ interface Conversation {
   title: string;
   messages: Message[];
   ended: boolean;
+    summary?: string | null;
+    summary_created_at?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface ConversationSummary {
+    conversation_id: string;
+    summary: string;
+    summary_created_at: string | null;
 }
 
 export const chatApi = createApi({
   reducerPath: "chatApi",
   baseQuery: baseQuery,
-  tagTypes: ["Conversations"],
+    tagTypes: ["Conversations", "ChatSummary"],
 
     endpoints: (builder) => ({
         startConversation: builder.mutation<any,void>({
@@ -79,6 +87,30 @@ export const chatApi = createApi({
             transformResponse: (data: any) => data.conversation || [],
             invalidatesTags: ["Conversations"],
         }),
+
+        getConversationSummary: builder.query<ConversationSummary, string>({
+            query: (conversationId) => ({
+                url: `/chat/${conversationId}/summary`,
+                method: "GET",
+            }),
+            transformResponse: (data: any) => data.summary,
+            providesTags: (_result, _error, conversationId) => [
+                { type: "ChatSummary", id: conversationId },
+            ],
+            keepUnusedDataFor: 1800,
+        }),
+
+        generateConversationSummary: builder.mutation<ConversationSummary, string>({
+            query: (conversationId) => ({
+                url: `/chat/${conversationId}/summary`,
+                method: "POST",
+            }),
+            transformResponse: (data: any) => data.summary,
+            invalidatesTags: (_result, _error, conversationId) => [
+                { type: "ChatSummary", id: conversationId },
+                "Conversations",
+            ],
+        }),
     }),
 });
 
@@ -91,4 +123,6 @@ export const {
   useCheckActiveConversationQuery,
   useEndConversationMutation,
   useSendMessageMutation,
+    useLazyGetConversationSummaryQuery,
+    useGenerateConversationSummaryMutation,
 } = chatApi;

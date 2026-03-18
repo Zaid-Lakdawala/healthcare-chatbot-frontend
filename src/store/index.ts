@@ -4,6 +4,7 @@ import { questionnaireApi } from '@/store/questionnaire/api.ts';
 import { chatApi } from '@/store/chat/api.ts';
 import { adminApi } from '@/store/admin/api.ts';
 import { documentApi } from '@/store/document/api.ts';
+import { consultationApi } from '@/store/consultation/api.ts';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     [chatApi.reducerPath]: chatApi.reducer,
     [adminApi.reducerPath]: adminApi.reducer,
     [documentApi.reducerPath]: documentApi.reducer,
+    [consultationApi.reducerPath]: consultationApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -19,7 +21,8 @@ export const store = configureStore({
       questionnaireApi.middleware, 
       chatApi.middleware,
       adminApi.middleware,
-      documentApi.middleware
+      documentApi.middleware,
+      consultationApi.middleware
     ),
 })
 

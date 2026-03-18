@@ -12,7 +12,7 @@ const AdminLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full">
-      <div className="z-10 h-screen w-full">
+      <div className="z-10 h-screen w-full overflow-y-auto overflow-x-hidden">
         <Outlet />
       </div>
     </div>
