@@ -16,12 +16,6 @@ import {
 } from "@/store/consultation/api";
 import { toast } from "sonner";
 
-const severityBadgeClass: Record<string, string> = {
-  low: "bg-blue-100 text-blue-800 border-blue-200",
-  medium: "bg-orange-100 text-orange-800 border-orange-200",
-  high: "bg-red-100 text-red-800 border-red-200",
-};
-
 const statusBadgeClass: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800 border-amber-200",
   accepted: "bg-sky-100 text-sky-800 border-sky-200",
@@ -157,17 +151,7 @@ const DoctorPage: React.FC = () => {
                       >
                         {consultation.status}
                       </Badge>
-                      <Badge
-                        className={
-                          severityBadgeClass[consultation.severity] || ""
-                        }
-                      >
-                        {consultation.severity}
-                      </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(consultation.created_at).toLocaleString()}
-                    </p>
                     <p className="text-sm line-clamp-4">
                       {consultation.summary}
                     </p>
@@ -214,19 +198,7 @@ const DoctorPage: React.FC = () => {
                       >
                         {consultation.status}
                       </Badge>
-                      <Badge
-                        className={
-                          severityBadgeClass[consultation.severity] || ""
-                        }
-                      >
-                        {consultation.severity}
-                      </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(
-                        consultation.updated_at || consultation.created_at,
-                      ).toLocaleString()}
-                    </p>
                     <p className="text-sm line-clamp-4 mt-1">
                       {consultation.summary}
                     </p>
@@ -257,14 +229,6 @@ const DoctorPage: React.FC = () => {
                         }
                       >
                         {selectedConsultation.status}
-                      </Badge>
-                      <Badge
-                        className={
-                          severityBadgeClass[selectedConsultation.severity] ||
-                          ""
-                        }
-                      >
-                        {selectedConsultation.severity}
                       </Badge>
                     </div>
                     {selectedConsultation.status !== "closed" && (
@@ -307,9 +271,6 @@ const DoctorPage: React.FC = () => {
                           }`}
                         >
                           <p className="whitespace-pre-wrap">{msg.message}</p>
-                          <p className="text-[10px] opacity-70 mt-1">
-                            {new Date(msg.timestamp).toLocaleTimeString()}
-                          </p>
                         </div>
                       </div>
                     ))}
